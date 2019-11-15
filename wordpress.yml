@@ -1,0 +1,7 @@
+---
+- hosts: wordpress
+  gather_facts: no
+  become: yes
+  become_method: sudo
+  roles:
+    - wordpress

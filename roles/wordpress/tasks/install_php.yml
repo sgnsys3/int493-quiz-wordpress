@@ -1,0 +1,12 @@
+---
+- name: Install php
+  yum:
+    name:
+      - php
+      - php-common
+      - php-mysql
+      - php-gd
+      - php-xml
+      - php-mbstring
+      - php-mcrypt
+      - php-xmlrpc

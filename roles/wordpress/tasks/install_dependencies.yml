@@ -1,0 +1,9 @@
+---
+- name: Install Dependencies
+  yum:
+    name:
+      - unzip
+      - zip
+      - wget
+      - python
+      - MySQL-python

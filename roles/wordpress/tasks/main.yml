@@ -1,0 +1,7 @@
+---
+- import_tasks: ./install_dependencies.yml
+- import_tasks: ./install_php.yml
+- import_tasks: ./install_httpd.yml
+- import_tasks: ./install_db.yml
+- import_tasks: ./config_mariadb.yml
+- import_tasks: ./config_wordpress.yml

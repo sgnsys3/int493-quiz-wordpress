@@ -1,0 +1,12 @@
+---
+- name: Install Dependencies
+  yum:
+    name:
+      - mariadb
+      - mariadb-server
+
+- name: Start and enable mariadb
+  systemd:
+    name: mariadb.service
+    state: started
+    enabled: yes

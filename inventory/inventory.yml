@@ -1,0 +1,12 @@
+all:
+  children:
+    wordpress:
+      hosts:
+        192.168.52.141:
+          ansible_password: centos
+          ansible_become_pass: "{{ ansible_password }}"
+          ansible_user: centos
+          wordpress_db_name: wordpress
+          wordpress_db_username: ansible
+          wordpress_db_password: mypassword
+          db_root_password: abc

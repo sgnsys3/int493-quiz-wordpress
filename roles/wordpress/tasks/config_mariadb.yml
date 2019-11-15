@@ -1,0 +1,48 @@
+---
+- name: Test mariadb configuration
+  shell: mysql -u root -e 'exit'
+  register: test_mariadb
+  ignore_errors: yes
+
+- name: setup a new mariadb
+  block:
+    - name: Remove all anoymous user account
+      mysql_user:
+        name: ''
+        login_host: localhost
+        login_user: root
+        host_all: yes
+        state: absent
+    - name: Remove extenal root access
+      shell: mysql -u root -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
+    - name: Drop test db
+      mysql_db:
+        name: test
+        login_host: localhost
+        login_user: root
+        state: absent
+    - name: Remove test db privileges
+      shell: mysql -u root -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\_%'; Flush privileges;"
+    - name: update root password
+      mysql_user:
+        name: root
+        password: "{{ db_root_password }}"
+        host_all: yes
+  when: test_mariadb.rc == 0
+
+- name: create wordpress db
+  mysql_db:
+    login_host: localhost
+    login_user: root
+    login_password: "{{ db_root_password }}"
+    name: "{{ wordpress_db_name }}"
+    state: present
+- name: create ansible wordpress user
+  mysql_user:
+    login_host: localhost
+    login_user: root
+    login_password: "{{ db_root_password }}"
+    name: "{{ wordpress_db_username }}"
+    password: "{{ wordpress_db_password }}"
+    priv: '{{ wordpress_db_name }}.*:ALL'
+    state: present

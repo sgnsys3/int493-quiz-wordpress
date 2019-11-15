@@ -1,0 +1,53 @@
+---
+- name: Check wordpress installation
+  stat:
+    path: /var/www/html/wordpress
+  register: stat_result
+- name: Download wordpress
+  unarchive:
+    remote_src: yes
+    src: https://wordpress.org/wordpress-5.0.tar.gz
+    dest: /var/www/html
+    owner: apache
+    group: apache
+  when: stat_result.stat.exists == False
+- name: Chmod wordpress
+  file:
+    path: /var/www/html/wordpress
+    mode: "755"
+    recurse: yes
+- name: Create upload directory
+  file:
+    path: /var/www/html/wordpress/wp-content/uploads
+    state: directory
+    recurse: yes
+    group: apache
+- name: Check wordpress config installation
+  stat:
+    path: /var/www/html/wordpress/wp-config.php
+  register: stat_result_config
+- name: config config
+  block:
+    - name: deploy default config
+      copy:
+        src: /var/www/html/wordpress/wp-config-sample.php
+        dest: /var/www/html/wordpress/wp-config.php
+        remote_src: yes
+        mode: preserve
+        owner: apache
+        group: apache
+    - name: Change default config
+      lineinfile:
+        path: /var/www/html/wordpress/wp-config.php
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      loop:
+        - { regexp: ^define\('DB_NAME', line: "define('DB_NAME', '{{ wordpress_db_name }}');" }
+        - { regexp: ^define\('DB_USER', line: "define('DB_USER', '{{ wordpress_db_username }}');" }
+        - { regexp: ^define\('DB_PASSWORD', line: "define('DB_PASSWORD', '{{ wordpress_db_password }}');" }
+        - { regexp: ^define\('DB_HOST', line: "define('DB_HOST', 'localhost');" }
+    - name: delete sample file
+      file:
+        path: /var/www/html/wordpress/wp-config-sample.php
+        state: absent
+  when: stat_result_config.stat.exists == False
